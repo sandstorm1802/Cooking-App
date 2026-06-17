@@ -129,7 +129,6 @@ button {
   font-size:52px;
   background: linear-gradient(135deg, #7a2f17, #f2b15b);
 }
-}
 .card-body { padding: 14px; }
 .card h3 { margin: 0 0 12px; font-size: 21px; }
 .tags { display:flex; flex-wrap:wrap; gap:7px; margin:10px 0; }
@@ -230,4 +229,42 @@ button {
   .sidebar { width:100%; min-height:auto; position:relative; }
   .layout,.detail-body,.filters { grid-template-columns:1fr; }
   .grid { grid-template-columns:1fr; }
+}
+
+.method-line {
+  font-size: 12px;
+  line-height: 1.35;
+  color: #7a461f;
+  font-weight: 700;
+  margin: 6px 0 10px;
+}
+
+.method-picker {
+  padding: 16px 28px;
+  border-bottom: 1px solid #eee3d8;
+  background: #fffaf2;
+}
+
+.method-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.method-btn {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.method-btn.active {
+  background: #7a461f;
+  border-color: #7a461f;
+  color: white;
+}
+
+@media (min-width: 1001px) {
+  .filters {
+    grid-template-columns: repeat(5, 1fr) 110px 110px;
+  }
 }
