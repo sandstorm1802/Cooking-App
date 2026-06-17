@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cooking with the Matt's</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">👨‍🍳</div>
+    <h1>Cooking with the Matt's</h1>
+    <p>Our recipes. Made with love.</p>
+
+    <button class="nav active" data-category="All">🏠 Home</button>
+    <button class="nav" data-category="Main Dishes">🍗 Main Dishes</button>
+    <button class="nav" data-category="Sides">🥔 Sides</button>
+    <button class="nav" data-category="Sauces & Dips">🥣 Sauces & Dips</button>
+    <button class="nav" data-category="Rubs & Seasonings">🌶️ Rubs & Seasonings</button>
+    <button class="nav" data-category="Desserts">🍰 Desserts</button>
+
+    <hr/>
+
+    <button class="nav" id="show-shopping">🛒 Shopping List</button>
+
+    <div class="tip">
+      <strong>❄️ Meal Prep Tip</strong>
+      <p>Most recipes that serve 4 or more can be frozen for up to 3 months.</p>
+    </div>
+  </aside>
+
+  <main class="app">
+    <header class="topbar">
+      <input id="search" type="text" placeholder="Search recipes..." />
+      <button id="favoritesBtn">♡ Favorites</button>
+      <button id="addRecipeBtn">＋ Add Recipe</button>
+    </header>
+
+    <section class="filters">
+      <label>Category
+        <select id="categoryFilter"></select>
+      </label>
+      <label>Protein
+        <select id="proteinFilter"></select>
+      </label>
+      <label>Sauce / Style
+        <select id="sauceFilter"></select>
+      </label>
+      <label>Carb / Side
+        <select id="carbFilter"></select>
+      </label>
+      <button id="searchBtn">Search</button>
+      <button id="clearBtn">Clear</button>
+    </section>
+
+    <section class="layout">
+      <section class="recipe-list">
+        <h2 id="resultTitle">Recipes</h2>
+        <div id="recipeGrid" class="grid"></div>
+      </section>
+
+      <section class="detail" id="recipeDetail"></section>
+    </section>
+  </main>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <button id="closeModal" class="close">×</button>
+      <h2>Shopping List</h2>
+      <div id="shoppingList"></div>
+      <button id="clearShopping">Clear Shopping List</button>
+    </div>
+  </div>
+
+  <script src="recipes.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
