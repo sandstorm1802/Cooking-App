@@ -345,9 +345,25 @@ function selectRecipe(id, skipGridRender = false) {
   // in the grid. Desktop keeps them side-by-side, so no scroll needed.
   // Only fires on a direct tap, not internal reselects (skipGridRender=true).
   if (!skipGridRender && window.innerWidth <= 1024) {
-    const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    $("recipeDetail").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    scrollToDetail();
   }
+}
+
+/* iOS Safari can silently drop or mistime scrollIntoView() when it's
+   called right after a large innerHTML re-render (like the card grid
+   above). Deferring to the next two paint frames and computing the
+   scroll position manually is far more reliable there than relying on
+   scrollIntoView's built-in behavior. */
+function scrollToDetail() {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const el = $("recipeDetail");
+      if (!el) return;
+      const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const top = el.getBoundingClientRect().top + window.pageYOffset - 76;
+      window.scrollTo({ top, behavior: reduceMotion ? "auto" : "smooth" });
+    });
+  });
 }
 
 function changeMethod(method) {
