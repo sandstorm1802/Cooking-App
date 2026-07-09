@@ -190,6 +190,7 @@ button {
   border:1px solid #dfd4c8;
   border-radius: 12px;
   overflow:hidden;
+  scroll-margin-top: 76px;
 }
 .detail-head { padding: 22px 28px; border-bottom: 1px solid #eee3d8; }
 .detail h2 { margin: 0; font-size: 34px; }

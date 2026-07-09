@@ -339,6 +339,15 @@ function selectRecipe(id, skipGridRender = false) {
   currentServings = selectedRecipe.servings;
   renderDetail();
   if (!skipGridRender) renderGrid();
+
+  // On mobile/tablet the grid and detail are stacked, not side by side —
+  // jump to the recipe so tapping a card doesn't leave you scrolled up
+  // in the grid. Desktop keeps them side-by-side, so no scroll needed.
+  // Only fires on a direct tap, not internal reselects (skipGridRender=true).
+  if (!skipGridRender && window.innerWidth <= 1024) {
+    const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    $("recipeDetail").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  }
 }
 
 function changeMethod(method) {
