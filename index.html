@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>Cooking with the Matt's</title>
+  <link rel="stylesheet" href="styles.css"/>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" href="icons/icon-192.png">
+  <meta name="theme-color" content="#081521">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Matt's Cooking">
+</head>
+<body>
+  <div id="sidebarOverlay" class="sidebar-overlay hidden"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <button class="close-sidebar" id="closeSidebar" aria-label="Close menu">×</button>
+    <div class="logo">👨‍🍳</div>
+    <h1>Cooking with the Matt's</h1>
+    <p>Our recipes. Made with love.</p>
+
+    <button class="nav active" data-category="All">🏠 Home</button>
+    <button class="nav" data-category="Main Dishes">🍗 Main Dishes</button>
+    <button class="nav" data-category="Breakfast">🧇 Breakfast</button>
+    <button class="nav" data-category="Sides">🥔 Sides</button>
+    <button class="nav" data-category="Sauces & Dips">🥣 Sauces & Dips</button>
+    <button class="nav" data-category="Rubs & Seasonings">🌶️ Rubs & Seasonings</button>
+    <button class="nav" data-category="Desserts">🍰 Desserts</button>
+
+    <hr/>
+
+    <button class="nav" id="show-shopping">🛒 Shopping List</button>
+    <button class="nav" id="show-data">💾 My Data</button>
+
+    <div class="tip">
+      <strong>❄️ Meal Prep Tip</strong>
+      <p>Most recipes that serve 4 or more can be frozen for up to 3 months.</p>
+    </div>
+  </aside>
+
+  <main class="app">
+    <header class="topbar">
+      <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">☰</button>
+      <input id="search" type="text" placeholder="Search recipes..." />
+      <button id="favoritesBtn">♡ Favorites</button>
+      <button id="addRecipeBtn">＋ Add Recipe</button>
+    </header>
+
+    <section class="filters">
+      <label>Category
+        <select id="categoryFilter"></select>
+      </label>
+      <label>Protein
+        <select id="proteinFilter"></select>
+      </label>
+      <label>Sauce / Style
+        <select id="sauceFilter"></select>
+      </label>
+      <label>Carb / Side
+        <select id="carbFilter"></select>
+      </label>
+      <label>Cooking Method
+        <select id="methodFilter"></select>
+      </label>
+      <button id="searchBtn">Search</button>
+      <button id="clearBtn">Clear</button>
+    </section>
+
+    <section class="layout">
+      <section class="recipe-list">
+        <h2 id="resultTitle">Recipes</h2>
+        <div id="recipeGrid" class="grid"></div>
+      </section>
+
+      <section class="detail" id="recipeDetail"></section>
+    </section>
+  </main>
+
+  <!-- Shopping list -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <button id="closeModal" class="close">×</button>
+      <h2>Shopping List</h2>
+      <div id="shoppingList"></div>
+      <button id="clearShopping">Clear Shopping List</button>
+    </div>
+  </div>
+
+  <!-- Add / Edit recipe -->
+  <div id="addRecipeModal" class="modal hidden">
+    <div class="modal-content wide">
+      <button id="closeAddRecipeModal" class="close">×</button>
+      <h2 id="addRecipeModalTitle">Add a Recipe</h2>
+      <p class="form-hint">This saves to your device right away. To make it permanent and visible everywhere, download the updated <code>recipes.js</code> when you're done and push it to GitHub.</p>
+
+      <form id="addRecipeForm">
+        <div class="form-grid">
+          <label>Recipe Name*
+            <input type="text" id="f-name" required placeholder="e.g. Smoked Beef Ribs">
+          </label>
+          <label>Servings*
+            <input type="number" id="f-servings" min="1" value="4" required>
+          </label>
+          <label>Category*
+            <input type="text" id="f-category" list="categoryList" required placeholder="e.g. Main Dishes">
+            <datalist id="categoryList"></datalist>
+          </label>
+          <label>Protein
+            <input type="text" id="f-protein" list="proteinList" placeholder="e.g. Beef">
+            <datalist id="proteinList"></datalist>
+          </label>
+          <label>Sauce / Style
+            <input type="text" id="f-sauce" list="sauceList" placeholder="e.g. BBQ">
+            <datalist id="sauceList"></datalist>
+          </label>
+          <label>Carb / Side
+            <input type="text" id="f-carb" list="carbList" placeholder="e.g. Rice">
+            <datalist id="carbList"></datalist>
+          </label>
+          <label>Prep Time
+            <input type="text" id="f-prep" placeholder="e.g. 10 min">
+          </label>
+          <label>Emoji (fallback if no photo)
+            <input type="text" id="f-emoji" placeholder="🍽️" maxlength="4">
+          </label>
+        </div>
+
+        <label class="block-label">Photo <span class="form-hint-inline">(optional — upload a photo, or leave blank to use the emoji above)</span>
+          <input type="file" id="f-image-file" accept="image/*">
+        </label>
+        <div id="imagePreviewWrap" class="image-preview-wrap hidden">
+          <img id="f-image-preview" alt="Photo preview">
+          <button type="button" id="removeImageBtn">Remove photo</button>
+        </div>
+
+        <div class="form-checks">
+          <label class="check-inline"><input type="checkbox" id="f-mealprep"> Good for meal prep</label>
+          <label class="check-inline"><input type="checkbox" id="f-freezer"> Freezer friendly</label>
+        </div>
+
+        <label class="block-label">Ingredients* <span class="form-hint-inline">(one per line, e.g. "2 lbs chicken thighs")</span>
+          <textarea id="f-ingredients" rows="6" required placeholder="2 lbs chicken thighs&#10;1 tbsp BBQ rub&#10;1 cup BBQ sauce"></textarea>
+        </label>
+
+        <label class="block-label">Notes <span class="form-hint-inline">(one per line, optional)</span>
+          <textarea id="f-notes" rows="3" placeholder="Freezes well for up to 3 months."></textarea>
+        </label>
+
+        <label class="block-label">Pairs well with <span class="form-hint-inline">(comma separated, optional)</span>
+          <input type="text" id="f-pairs" placeholder="Green Beans, Garlic Bread">
+        </label>
+
+        <h3>Cooking Methods*</h3>
+        <p class="form-hint">Check every method this recipe works with. Leave unrelated ones unchecked — that's what keeps "impossible" combinations off the recipe page.</p>
+        <div id="methodFieldsets" class="method-fieldsets"></div>
+
+        <p id="addRecipeError" class="form-error hidden"></p>
+
+        <div class="actions">
+          <button type="submit" class="primary" id="addRecipeSubmitBtn">Save Recipe</button>
+          <button type="button" id="resetOverrideBtn" class="hidden">↺ Reset to Original Recipe</button>
+          <button type="button" id="cancelAddRecipe">Cancel</button>
+        </div>
+      </form>
+
+      <div id="addRecipeSuccess" class="hidden">
+        <p class="form-success" id="addRecipeSuccessMsg">✅ Saved to this device. To make it permanent, download the updated file and push it to GitHub.</p>
+        <div class="actions">
+          <button class="primary" id="downloadRecipesBtn">⬇ Download updated recipes.js</button>
+          <button id="addAnotherBtn">Add Another Recipe</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- My Data: backup / restore -->
+  <div id="dataModal" class="modal hidden">
+    <div class="modal-content">
+      <button id="closeDataModal" class="close">×</button>
+      <h2>My Data</h2>
+      <p class="form-hint">
+        Your added/edited recipes, favorites, and shopping list live only in this browser
+        until you download <code>recipes.js</code> and push it to GitHub. Use this to back
+        up or move that data to another browser or device.
+      </p>
+
+      <h3>Export</h3>
+      <p class="form-hint">Downloads everything you've added or changed as one JSON file.</p>
+      <button class="primary" id="exportDataBtn">⬇ Export My Data</button>
+
+      <h3 style="margin-top:20px;">Import</h3>
+      <p class="form-hint">Restores data from a previously exported file. This adds to — and overwrites matching IDs in — what's already saved here.</p>
+      <input type="file" id="importDataInput" accept="application/json">
+
+      <p id="dataModalMessage" class="form-success hidden"></p>
+    </div>
+  </div>
+
+  <script src="recipes.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
