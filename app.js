@@ -774,11 +774,28 @@ function resizeImageToDataUrl(file, maxDim = 900, quality = 0.72) {
   });
 }
 
+/* Guards against near-duplicate categories/tags from small typing
+   differences — a curly "smart quote" instead of a straight one
+   (common on iPhone), extra whitespace, or different casing. If what
+   was typed is a case/punctuation-insensitive match for an existing
+   value, snap to that value's exact canonical spelling so it still
+   files under the same bucket instead of silently creating a new one. */
+function normalizeForCompare(s) {
+  return s.trim().toLowerCase().replace(/[\u2018\u2019\u02BC]/g, "'");
+}
+
+function canonicalize(input, knownValues) {
+  const cleaned = input.trim();
+  if (!cleaned) return cleaned;
+  const match = knownValues.find(v => normalizeForCompare(v) === normalizeForCompare(cleaned));
+  return match || cleaned;
+}
+
 function handleAddRecipeSubmit(e) {
   e.preventDefault();
 
   const name = $("f-name").value.trim();
-  const category = $("f-category").value.trim();
+  const category = canonicalize($("f-category").value, sidebarCategories());
   const servings = parseInt($("f-servings").value, 10);
   const ingredients = linesToArray($("f-ingredients").value);
 
@@ -813,9 +830,9 @@ function handleAddRecipeSubmit(e) {
     id,
     name,
     category,
-    protein: $("f-protein").value.trim(),
-    sauce: $("f-sauce").value.trim(),
-    carb: $("f-carb").value.trim(),
+    protein: canonicalize($("f-protein").value, uniqueValues("protein")),
+    sauce: canonicalize($("f-sauce").value, uniqueValues("sauce")),
+    carb: canonicalize($("f-carb").value, uniqueValues("carb")),
     emoji: $("f-emoji").value.trim() || "🍽️",
     servings,
     prep: $("f-prep").value.trim(),
