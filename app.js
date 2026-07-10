@@ -260,9 +260,28 @@ function setupAutocomplete(inputId, getOptions) {
 
   function position() {
     const rect = input.getBoundingClientRect();
+    // visualViewport reflects the space actually visible above an open
+    // iOS keyboard; window.innerHeight does not, which is what let the
+    // dropdown extend underneath the keyboard and hide the last items.
+    const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    const margin = 8;
+    const spaceBelow = viewportHeight - rect.bottom - margin;
+    const spaceAbove = rect.top - margin;
+    const preferredMax = 240;
+    const minUsable = 120;
+
     dropdown.style.left = `${rect.left}px`;
-    dropdown.style.top = `${rect.bottom + 4}px`;
     dropdown.style.width = `${rect.width}px`;
+
+    if (spaceBelow >= minUsable || spaceBelow >= spaceAbove) {
+      dropdown.style.bottom = "";
+      dropdown.style.top = `${rect.bottom + 4}px`;
+      dropdown.style.maxHeight = `${Math.max(minUsable, Math.min(preferredMax, spaceBelow))}px`;
+    } else {
+      dropdown.style.top = "";
+      dropdown.style.bottom = `${viewportHeight - rect.top + 4}px`;
+      dropdown.style.maxHeight = `${Math.max(minUsable, Math.min(preferredMax, spaceAbove))}px`;
+    }
   }
 
   function render() {
@@ -308,6 +327,7 @@ function setupAutocomplete(inputId, getOptions) {
   const modalContent = input.closest(".modal-content");
   if (modalContent) modalContent.addEventListener("scroll", hide);
   window.addEventListener("resize", hide);
+  if (window.visualViewport) window.visualViewport.addEventListener("resize", hide);
 }
 
 function initFilters() {
