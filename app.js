@@ -235,21 +235,32 @@ function sidebarCategories() {
 }
 
 function initFilters() {
-  fillSelect("categoryFilter", uniqueValues("category"));
-  fillSelect("proteinFilter", uniqueValues("protein"));
-  fillSelect("sauceFilter", uniqueValues("sauce"));
-  fillSelect("carbFilter", uniqueValues("carb"));
-  fillSelect("methodFilter", uniqueValues("method"));
+  const steps = [
+    ["categoryFilter (select)", () => fillSelect("categoryFilter", uniqueValues("category"))],
+    ["proteinFilter (select)", () => fillSelect("proteinFilter", uniqueValues("protein"))],
+    ["sauceFilter (select)", () => fillSelect("sauceFilter", uniqueValues("sauce"))],
+    ["carbFilter (select)", () => fillSelect("carbFilter", uniqueValues("carb"))],
+    ["methodFilter (select)", () => fillSelect("methodFilter", uniqueValues("method"))],
+    // Category suggestions include the sidebar's official categories even
+    // before any recipe uses them, so a brand-new empty category (like one
+    // you just added a nav button for) is still discoverable via autocomplete
+    // instead of requiring an exact hand-typed match.
+    ["categoryList (datalist)", () => {
+      const categorySuggestions = [...new Set([...sidebarCategories(), ...uniqueValues("category").filter(c => c !== "All")])];
+      fillDatalist("categoryList", categorySuggestions);
+    }],
+    ["proteinList (datalist)", () => fillDatalist("proteinList", uniqueValues("protein"))],
+    ["sauceList (datalist)", () => fillDatalist("sauceList", uniqueValues("sauce"))],
+    ["carbList (datalist)", () => fillDatalist("carbList", uniqueValues("carb"))]
+  ];
 
-  // Category suggestions include the sidebar's official categories even
-  // before any recipe uses them, so a brand-new empty category (like one
-  // you just added a nav button for) is still discoverable via autocomplete
-  // instead of requiring an exact hand-typed match.
-  const categorySuggestions = [...new Set([...sidebarCategories(), ...uniqueValues("category").filter(c => c !== "All")])];
-  fillDatalist("categoryList", categorySuggestions);
-  fillDatalist("proteinList", uniqueValues("protein"));
-  fillDatalist("sauceList", uniqueValues("sauce"));
-  fillDatalist("carbList", uniqueValues("carb"));
+  steps.forEach(([label, fn]) => {
+    try {
+      fn();
+    } catch (e) {
+      console.error(`initFilters: failed to populate ${label}:`, e);
+    }
+  });
 }
 
 function filteredRecipes() {
