@@ -222,16 +222,67 @@ function fillSelect(id, values) {
   el.innerHTML = values.map(v => `<option value="${v}">${v}</option>`).join("");
 }
 
-function fillDatalist(id, values) {
-  const el = $(id);
-  if (!el) return;
-  el.innerHTML = values.filter(v => v !== "All").map(v => `<option value="${v}"></option>`).join("");
-}
-
 function sidebarCategories() {
   return [...document.querySelectorAll(".nav[data-category]")]
     .map(b => b.dataset.category)
     .filter(c => c !== "All");
+}
+
+function categorySuggestions() {
+  return [...new Set([...sidebarCategories(), ...uniqueValues("category").filter(c => c !== "All")])];
+}
+
+/* Custom autocomplete, built once per field. Replaces native <datalist>,
+   which renders as a broken, non-scrollable 3-item strip on iOS Safari.
+   getOptions is a live function (not a static array) so suggestions stay
+   current as recipes/categories are added, without needing to rebuild
+   the dropdown each time initFilters() runs. */
+function setupAutocomplete(inputId, getOptions) {
+  const input = $(inputId);
+  if (!input) return;
+
+  const wrap = document.createElement("div");
+  wrap.className = "autocomplete-wrap";
+  input.parentNode.insertBefore(wrap, input);
+  wrap.appendChild(input);
+
+  const dropdown = document.createElement("div");
+  dropdown.className = "autocomplete-dropdown hidden";
+  wrap.appendChild(dropdown);
+
+  function render() {
+    const query = input.value.trim().toLowerCase();
+    const options = getOptions().filter(Boolean);
+    const matches = query ? options.filter(v => v.toLowerCase().includes(query)) : options;
+
+    if (!matches.length) {
+      dropdown.classList.add("hidden");
+      dropdown.innerHTML = "";
+      return;
+    }
+    dropdown.innerHTML = matches.slice(0, 20)
+      .map(v => `<div class="autocomplete-item">${v}</div>`)
+      .join("");
+    dropdown.classList.remove("hidden");
+  }
+
+  function pick(e) {
+    const item = e.target.closest(".autocomplete-item");
+    if (!item) return;
+    input.value = item.textContent;
+    dropdown.classList.add("hidden");
+    input.dispatchEvent(new Event("change"));
+  }
+
+  input.addEventListener("focus", render);
+  input.addEventListener("input", render);
+  // touchstart/mousedown fire before blur, so a tap/click registers
+  // before the dropdown gets hidden by the blur handler below.
+  dropdown.addEventListener("touchstart", pick, { passive: true });
+  dropdown.addEventListener("mousedown", pick);
+  input.addEventListener("blur", () => {
+    setTimeout(() => dropdown.classList.add("hidden"), 150);
+  });
 }
 
 function initFilters() {
@@ -240,18 +291,7 @@ function initFilters() {
     ["proteinFilter (select)", () => fillSelect("proteinFilter", uniqueValues("protein"))],
     ["sauceFilter (select)", () => fillSelect("sauceFilter", uniqueValues("sauce"))],
     ["carbFilter (select)", () => fillSelect("carbFilter", uniqueValues("carb"))],
-    ["methodFilter (select)", () => fillSelect("methodFilter", uniqueValues("method"))],
-    // Category suggestions include the sidebar's official categories even
-    // before any recipe uses them, so a brand-new empty category (like one
-    // you just added a nav button for) is still discoverable via autocomplete
-    // instead of requiring an exact hand-typed match.
-    ["categoryList (datalist)", () => {
-      const categorySuggestions = [...new Set([...sidebarCategories(), ...uniqueValues("category").filter(c => c !== "All")])];
-      fillDatalist("categoryList", categorySuggestions);
-    }],
-    ["proteinList (datalist)", () => fillDatalist("proteinList", uniqueValues("protein"))],
-    ["sauceList (datalist)", () => fillDatalist("sauceList", uniqueValues("sauce"))],
-    ["carbList (datalist)", () => fillDatalist("carbList", uniqueValues("carb"))]
+    ["methodFilter (select)", () => fillSelect("methodFilter", uniqueValues("method"))]
   ];
 
   steps.forEach(([label, fn]) => {
@@ -806,7 +846,7 @@ function handleAddRecipeSubmit(e) {
   e.preventDefault();
 
   const name = $("f-name").value.trim();
-  const category = canonicalize($("f-category").value, sidebarCategories());
+  const category = canonicalize($("f-category").value, categorySuggestions());
   const servings = parseInt($("f-servings").value, 10);
   const ingredients = linesToArray($("f-ingredients").value);
 
@@ -1129,6 +1169,10 @@ $("importDataInput").addEventListener("change", (e) => {
 
 buildMethodFieldsets();
 initFilters();
+setupAutocomplete("f-category", categorySuggestions);
+setupAutocomplete("f-protein", () => uniqueValues("protein").filter(v => v !== "All"));
+setupAutocomplete("f-sauce", () => uniqueValues("sauce").filter(v => v !== "All"));
+setupAutocomplete("f-carb", () => uniqueValues("carb").filter(v => v !== "All"));
 selectedMethod = preferredMethodFor(selectedRecipe);
 currentServings = selectedRecipe ? selectedRecipe.servings : 1;
 renderGrid();
