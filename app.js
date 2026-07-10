@@ -275,6 +275,7 @@ function setupAutocomplete(inputId, getOptions) {
   }
 
   input.addEventListener("focus", render);
+  input.addEventListener("click", render);
   input.addEventListener("input", render);
   // touchstart/mousedown fire before blur, so a tap/click registers
   // before the dropdown gets hidden by the blur handler below.
