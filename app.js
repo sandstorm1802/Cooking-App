@@ -172,18 +172,51 @@ function formatQty(value) {
   return `${wholeOut} ${fracOut}`;
 }
 
+// Units that are genuinely divisible in the kitchen — a fraction of these
+// is a normal, followable instruction ("¾ cup", "½ tsp").
+const MEASURED_UNITS = new Set([
+  "cup", "cups",
+  "tbsp", "tbsps", "tablespoon", "tablespoons",
+  "tsp", "tsps", "teaspoon", "teaspoons",
+  "oz", "ozs", "ounce", "ounces",
+  "lb", "lbs", "pound", "pounds",
+  "g", "gram", "grams", "kg", "kilogram", "kilograms",
+  "ml", "milliliter", "milliliters", "l", "liter", "liters",
+  "pinch", "pinches", "dash", "dashes",
+  "quart", "quarts", "pint", "pints", "gallon", "gallons",
+  "stick", "sticks"
+]);
+
+// Everything else (eggs, cloves, slices, cans, chicken thighs, tortillas...)
+// only exists in whole units — "⅞ egg yolk" isn't an instruction anyone
+// can actually follow, so those round to the nearest whole number instead
+// of a fraction, with a floor of 1 since you can't use a fraction of one.
+function formatWholeQty(value) {
+  if (!isFinite(value) || value <= 0) return "0";
+  return String(Math.max(1, Math.round(value)));
+}
+
+function unitWordAfter(text, matchLength) {
+  const rest = text.slice(matchLength).trimStart();
+  const wordMatch = rest.match(/^[a-zA-Z]+/);
+  return wordMatch ? wordMatch[0].toLowerCase() : "";
+}
+
 function scaleIngredientText(text, factor) {
   if (!factor || factor === 1) return text;
   const match = text.match(LEADING_QTY_RE);
   if (!match) return text;
 
+  const unit = unitWordAfter(text, match[0].length);
+  const format = MEASURED_UNITS.has(unit) ? formatQty : formatWholeQty;
+
   const qty1 = parseQtyToken(match[1]);
-  const scaled1 = formatQty(qty1 * factor);
+  const scaled1 = format(qty1 * factor);
 
   let out = scaled1;
   if (match[3]) {
     const qty2 = parseQtyToken(match[3]);
-    const scaled2 = formatQty(qty2 * factor);
+    const scaled2 = format(qty2 * factor);
     out += match[2].trim().length ? match[2] : "–";
     out += scaled2;
   }
