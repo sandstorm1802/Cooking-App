@@ -144,11 +144,15 @@ function formatQty(value) {
   const frac = value - whole;
   const fracMap = [
     [0, ""],
+    [1 / 8, "⅛"],
     [1 / 4, "¼"],
     [1 / 3, "⅓"],
+    [3 / 8, "⅜"],
     [1 / 2, "½"],
+    [5 / 8, "⅝"],
     [2 / 3, "⅔"],
     [3 / 4, "¾"],
+    [7 / 8, "⅞"],
     [1, ""]
   ];
   let best = fracMap[0];
@@ -158,7 +162,7 @@ function formatQty(value) {
   let wholeOut = whole;
   let fracOut = best[1];
   if (best[0] === 1) { wholeOut += 1; fracOut = ""; }
-  if (Math.abs(best[0] - frac) > 0.06) {
+  if (Math.abs(best[0] - frac) > 0.063) {
     const rounded = Math.round(value * 100) / 100;
     return String(rounded);
   }
