@@ -782,7 +782,7 @@ const recipes = [
   {
     id: 14,
     name: "Egg Salad",
-    category: "Breakfast",
+    category: "Main Dishes",
     protein: "Eggs",
     sauce: "Mayo",
     carb: "Low Carb",
