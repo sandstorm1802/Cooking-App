@@ -228,6 +228,12 @@ function fillDatalist(id, values) {
   el.innerHTML = values.filter(v => v !== "All").map(v => `<option value="${v}"></option>`).join("");
 }
 
+function sidebarCategories() {
+  return [...document.querySelectorAll(".nav[data-category]")]
+    .map(b => b.dataset.category)
+    .filter(c => c !== "All");
+}
+
 function initFilters() {
   fillSelect("categoryFilter", uniqueValues("category"));
   fillSelect("proteinFilter", uniqueValues("protein"));
@@ -235,7 +241,12 @@ function initFilters() {
   fillSelect("carbFilter", uniqueValues("carb"));
   fillSelect("methodFilter", uniqueValues("method"));
 
-  fillDatalist("categoryList", uniqueValues("category"));
+  // Category suggestions include the sidebar's official categories even
+  // before any recipe uses them, so a brand-new empty category (like one
+  // you just added a nav button for) is still discoverable via autocomplete
+  // instead of requiring an exact hand-typed match.
+  const categorySuggestions = [...new Set([...sidebarCategories(), ...uniqueValues("category").filter(c => c !== "All")])];
+  fillDatalist("categoryList", categorySuggestions);
   fillDatalist("proteinList", uniqueValues("protein"));
   fillDatalist("sauceList", uniqueValues("sauce"));
   fillDatalist("carbList", uniqueValues("carb"));
