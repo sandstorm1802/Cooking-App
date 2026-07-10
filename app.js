@@ -737,10 +737,24 @@ function categorizeIngredient(text) {
   return match ? match.category : "Other";
 }
 
+// Ingredient lines often carry cooking-prep instructions after a comma
+// ("Pork belly, cut into 1.5-inch cubes") that make sense in the recipe
+// but are noise on a shopping list — nobody needs to buy "cut into
+// cubes." Purchase-relevant descriptors ("boneless, skinless") should
+// stay, so this only strips clauses that start with a recognizable prep
+// verb/phrase rather than stripping everything after the first comma.
+const PREP_CLAUSE_RE = /^(diced|chopped|minced|sliced(\s+into[^,]*)?|cubed|shredded|grated|crushed|peeled|zested|juiced|beaten|whisked|melted|softened|drained|rinsed|patted dry|room temperature|at room temperature|to taste|divided|optional|plus more(\s+for\s+[a-z\s]+)?|cut(\s+in\s+half)?\s*into[^,]*|reserved|for\s+\w+(\s+\w+)?|[a-z\s]*\bremoved)\b/i;
+
+function shoppingListText(text) {
+  const parts = text.split(",");
+  const kept = parts.filter((part, idx) => idx === 0 || !PREP_CLAUSE_RE.test(part.trim()));
+  return kept.map(p => p.trim()).join(", ");
+}
+
 function addToShoppingList(id) {
   const r = allRecipes.find(x => x.id === id);
   const factor = (r.id === selectedRecipe.id ? currentServings : r.servings) / r.servings;
-  const items = r.ingredients.map(i => scaleIngredientText(i, factor));
+  const items = r.ingredients.map(i => shoppingListText(scaleIngredientText(i, factor)));
   let added = 0;
   items.forEach(item => {
     if (!shoppingItems.some(s => s.text.toLowerCase() === item.toLowerCase())) {
