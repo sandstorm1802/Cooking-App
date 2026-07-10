@@ -241,6 +241,14 @@ function setupAutocomplete(inputId, getOptions) {
   const input = $(inputId);
   if (!input) return;
 
+  // Safari's native "previously typed here" autofill bar (the plain grey
+  // strip above the keyboard) largely ignores autocomplete="off" and
+  // keys off the field's name instead. Giving it a fresh random name on
+  // every load means Safari has never seen it before, so it has nothing
+  // to suggest — leaving the field free for our own dropdown below.
+  input.setAttribute("autocomplete", "off");
+  input.name = `nofill-${inputId}-${Math.random().toString(36).slice(2, 8)}`;
+
   // Appended to <body> and positioned with `fixed` (viewport-relative)
   // rather than nested inside the modal — nesting it inside
   // .modal-content, which has its own overflow:auto + max-height,
