@@ -241,14 +241,21 @@ function setupAutocomplete(inputId, getOptions) {
   const input = $(inputId);
   if (!input) return;
 
-  const wrap = document.createElement("div");
-  wrap.className = "autocomplete-wrap";
-  input.parentNode.insertBefore(wrap, input);
-  wrap.appendChild(input);
-
+  // Appended to <body> and positioned with `fixed` (viewport-relative)
+  // rather than nested inside the modal — nesting it inside
+  // .modal-content, which has its own overflow:auto + max-height,
+  // caused the browser to clip the dropdown at the modal's boundary
+  // and made scrolling inside it fight with the modal's own scroll.
   const dropdown = document.createElement("div");
   dropdown.className = "autocomplete-dropdown hidden";
-  wrap.appendChild(dropdown);
+  document.body.appendChild(dropdown);
+
+  function position() {
+    const rect = input.getBoundingClientRect();
+    dropdown.style.left = `${rect.left}px`;
+    dropdown.style.top = `${rect.bottom + 4}px`;
+    dropdown.style.width = `${rect.width}px`;
+  }
 
   function render() {
     const query = input.value.trim().toLowerCase();
@@ -260,17 +267,22 @@ function setupAutocomplete(inputId, getOptions) {
       dropdown.innerHTML = "";
       return;
     }
+    position();
     dropdown.innerHTML = matches.slice(0, 20)
       .map(v => `<div class="autocomplete-item">${v}</div>`)
       .join("");
     dropdown.classList.remove("hidden");
   }
 
+  function hide() {
+    dropdown.classList.add("hidden");
+  }
+
   function pick(e) {
     const item = e.target.closest(".autocomplete-item");
     if (!item) return;
     input.value = item.textContent;
-    dropdown.classList.add("hidden");
+    hide();
     input.dispatchEvent(new Event("change"));
   }
 
@@ -281,9 +293,13 @@ function setupAutocomplete(inputId, getOptions) {
   // before the dropdown gets hidden by the blur handler below.
   dropdown.addEventListener("touchstart", pick, { passive: true });
   dropdown.addEventListener("mousedown", pick);
-  input.addEventListener("blur", () => {
-    setTimeout(() => dropdown.classList.add("hidden"), 150);
-  });
+  input.addEventListener("blur", () => setTimeout(hide, 150));
+
+  // If the modal scrolls or the viewport resizes while the dropdown is
+  // open, just close it rather than let it drift away from the field.
+  const modalContent = input.closest(".modal-content");
+  if (modalContent) modalContent.addEventListener("scroll", hide);
+  window.addEventListener("resize", hide);
 }
 
 function initFilters() {

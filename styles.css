@@ -538,23 +538,18 @@ button {
 }
 
 /* ---------- Custom autocomplete (replaces native <datalist>, which
-   renders as a broken 3-item non-scrollable strip on iOS Safari) ---------- */
-.autocomplete-wrap {
-  position: relative;
-}
+   renders as a broken 3-item non-scrollable strip on iOS Safari).
+   Positioned `fixed` and appended to <body> so it floats above the
+   modal instead of being clipped by the modal's own overflow:auto. ---------- */
 .autocomplete-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: 4px;
+  position: fixed;
   background: white;
   border: 1px solid #d8cfc4;
   border-radius: 8px;
-  max-height: 190px;
+  max-height: 240px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  z-index: 80;
+  z-index: 200;
   box-shadow: 0 8px 20px rgba(0,0,0,.15);
 }
 .autocomplete-item {
