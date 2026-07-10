@@ -316,10 +316,46 @@ function setupAutocomplete(inputId, getOptions) {
   input.addEventListener("focus", render);
   input.addEventListener("click", render);
   input.addEventListener("input", render);
-  // touchstart/mousedown fire before blur, so a tap/click registers
-  // before the dropdown gets hidden by the blur handler below.
-  dropdown.addEventListener("touchstart", pick, { passive: true });
+
+  // mousedown fires before blur, so a desktop click registers before the
+  // dropdown gets hidden by the blur handler below. No scroll-gesture
+  // conflict on desktop, so this is safe to fire on mousedown directly.
   dropdown.addEventListener("mousedown", pick);
+
+  // On touch, selecting on touchstart (as this used to do) fires the
+  // instant a finger lands — including the start of a scroll swipe. That
+  // hides the dropdown mid-gesture, which is why swiping down to reach
+  // items below the fold (e.g. "Desserts") never worked: touching down
+  // anywhere in the list immediately picked whatever was under the
+  // finger and closed it before the swipe could scroll anything. Track
+  // movement instead, and only treat it as a selection if the finger
+  // didn't move — a real scroll passes through untouched.
+  let touchStartY = null;
+  let touchMoved = false;
+  const touchMoveThreshold = 8; // px of vertical travel that counts as "scrolling, not tapping"
+
+  dropdown.addEventListener("touchstart", (e) => {
+    touchStartY = e.touches[0].clientY;
+    touchMoved = false;
+  }, { passive: true });
+
+  dropdown.addEventListener("touchmove", (e) => {
+    if (touchStartY !== null && Math.abs(e.touches[0].clientY - touchStartY) > touchMoveThreshold) {
+      touchMoved = true;
+    }
+  }, { passive: true });
+
+  dropdown.addEventListener("touchend", (e) => {
+    if (touchMoved) return; // was a scroll — let it scroll, don't select
+    const touch = e.changedTouches[0];
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const item = el && el.closest(".autocomplete-item");
+    if (!item) return;
+    input.value = item.textContent;
+    hide();
+    input.dispatchEvent(new Event("change"));
+  }, { passive: true });
+
   input.addEventListener("blur", () => setTimeout(hide, 150));
 
   // If the modal scrolls while the dropdown is open, just close it rather
