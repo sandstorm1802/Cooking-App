@@ -322,12 +322,25 @@ function setupAutocomplete(inputId, getOptions) {
   dropdown.addEventListener("mousedown", pick);
   input.addEventListener("blur", () => setTimeout(hide, 150));
 
-  // If the modal scrolls or the viewport resizes while the dropdown is
-  // open, just close it rather than let it drift away from the field.
+  // If the modal scrolls while the dropdown is open, just close it rather
+  // than let it drift away from the field.
   const modalContent = input.closest(".modal-content");
   if (modalContent) modalContent.addEventListener("scroll", hide);
-  window.addEventListener("resize", hide);
-  if (window.visualViewport) window.visualViewport.addEventListener("resize", hide);
+
+  // The iOS keyboard opening/closing fires a visualViewport resize AFTER
+  // focus already ran render()/position() once against the pre-keyboard
+  // (too-tall) viewport height. If we just hide() here, the shrink/flip
+  // math in position() never actually gets to run against the real,
+  // keyboard-adjusted height — so re-run position() instead, and only
+  // while the dropdown is actually open.
+  function reflow() {
+    if (!dropdown.classList.contains("hidden")) position();
+  }
+  window.addEventListener("resize", reflow);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", reflow);
+    window.visualViewport.addEventListener("scroll", reflow);
+  }
 }
 
 function initFilters() {
