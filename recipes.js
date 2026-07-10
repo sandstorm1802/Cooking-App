@@ -355,54 +355,76 @@ const recipes = [
     "mealPrep": false,
     "freezerFriendly": true,
     "ingredients": [
-      "Pork belly, cut into 1.5-inch cubes",
-      "BBQ rub",
-      "Butter",
-      "Brown sugar",
-      "BBQ sauce"
+      "4-5 lbs boneless pork belly, skin removed, cut into 1.5-2 inch cubes",
+      "Yellow mustard or avocado oil, for binder",
+      "2 tbsp kosher salt",
+      "2 tbsp brown sugar",
+      "1 tbsp coarse black pepper",
+      "1 tbsp paprika",
+      "1 tsp garlic powder",
+      "1 tsp onion powder",
+      "1/2 tsp cayenne pepper, optional",
+      "4-5 tbsp butter, sliced into pats",
+      "1/2 cup brown sugar",
+      "Honey, for drizzling",
+      "Splash of apple juice",
+      "1/2-3/4 cup BBQ sauce"
     ],
     "methods": {
       "Oven": {
-        "cook": "3–4 hr",
+        "cook": "5–6 hr",
         "instructions": [
-          "Preheat oven to 275°F.",
-          "Cube pork belly and season heavily with BBQ rub.",
-          "Place on a wire rack over a sheet pan.",
-          "Bake 2–2.5 hours until rendered and browned.",
-          "Move pork belly to a foil pan with butter, brown sugar, and BBQ sauce.",
-          "Cover and bake 60 minutes, until tender.",
-          "Drain excess grease, sauce again, and bake uncovered 15–20 minutes."
+          "Remove any remaining skin from the pork belly.",
+          "Cut pork belly into 1.5-2 inch cubes.",
+          "Lightly coat with mustard or avocado oil, then season evenly with the rub (salt, brown sugar, pepper, paprika, garlic powder, onion powder, cayenne).",
+          "Let sit 15-30 minutes while the oven preheats to 275°F.",
+          "Place cubes on a wire rack set over a sheet pan, leaving space between pieces.",
+          "Bake 2.5-3 hours, until deeply browned and some fat has rendered. The oven won't build true bark like a smoker, but this gets close.",
+          "Transfer cubes to a foil pan with butter, brown sugar, honey, and a splash of apple juice. Cover tightly with foil.",
+          "Bake covered at 275°F for 1.5-2 hours, until a probe slides in easily, the fat looks translucent, and the cubes jiggle slightly when picked up.",
+          "Drain most of the rendered fat, leaving a small amount behind, then lightly coat cubes with BBQ sauce.",
+          "Bake uncovered 15-20 minutes until the sauce is sticky and glossy.",
+          "Rest 5-10 minutes before serving."
         ]
       },
       "Air Fryer": {
-        "cook": "35–45 min",
+        "cook": "45–60 min",
         "instructions": [
-          "Cut pork belly into smaller 1-inch cubes so they cook evenly.",
-          "Season with BBQ rub.",
-          "Air fry at 350°F for 25–30 minutes, shaking the basket every 8–10 minutes.",
-          "Move cubes to a small oven-safe pan or foil tray with butter, brown sugar, and BBQ sauce.",
-          "Air fry 8–12 minutes more at 330°F until sticky and tender.",
-          "Watch closely near the end because sugar can burn quickly."
+          "Remove any remaining skin from the pork belly.",
+          "Cut pork belly into 1-inch cubes (smaller than the smoker/oven version, so they cook through evenly).",
+          "Lightly coat with mustard or avocado oil, then season evenly with the rub (salt, brown sugar, pepper, paprika, garlic powder, onion powder, cayenne).",
+          "Air fry at 375°F for 20-25 minutes, shaking the basket every 8-10 minutes, until browned and some fat has rendered. Work in batches if needed so cubes aren't crowded.",
+          "Move cubes to a small oven-safe pan or foil tray with butter, brown sugar, honey, and a splash of apple juice.",
+          "Cover the tray with foil and air fry at 330°F for 12-15 minutes, until a probe slides in easily and the fat looks translucent.",
+          "Drain most of the rendered fat, leaving a small amount behind, then lightly coat cubes with BBQ sauce.",
+          "Air fry uncovered at 330°F for 5-8 minutes until sticky and glossy, watching closely since sugar can burn quickly.",
+          "Rest 5 minutes before serving."
         ]
       },
       "Recteq": {
-        "cook": "3.5–4.5 hr",
+        "cook": "5 1/2–6 1/2 hr",
         "instructions": [
-          "Preheat Recteq to 250°F.",
-          "Cube pork belly into 1.5-inch pieces.",
-          "Season generously with BBQ rub on all sides.",
-          "Place cubes on a rack or directly on the grate with space between pieces.",
-          "Cook until the bark develops, usually 2–2.5 hours.",
-          "Transfer to a foil pan with butter, brown sugar, and BBQ sauce.",
-          "Cover and cook until tender, about 60–90 minutes.",
-          "Drain excess grease carefully.",
-          "Sauce again and cook uncovered 15–20 minutes until sticky."
+          "Remove any remaining skin from the pork belly.",
+          "Cut pork belly into 1.5-2 inch cubes.",
+          "Lightly coat with mustard or avocado oil, then season evenly with the rub (salt, brown sugar, pepper, paprika, garlic powder, onion powder, cayenne).",
+          "Let sit 15-30 minutes while the smoker heats to 250°F.",
+          "Place cubes directly on the grate with a foil pan underneath to catch grease.",
+          "Smoke 3.5-4 hours undisturbed, until a deep mahogany bark develops, fat begins rendering, and cubes shrink slightly. Avoid opening the lid.",
+          "Transfer cubes to a foil pan with butter, brown sugar, honey, and a splash of apple juice. Cover tightly with foil.",
+          "Increase smoker to 275°F and cook 1.5-2 hours, checking after about an hour, until a probe slides in easily, the fat looks translucent, and the cubes jiggle slightly when picked up.",
+          "Drain most of the rendered fat, leaving a small amount behind, then lightly coat cubes with BBQ sauce.",
+          "Return to the smoker uncovered at 275°F for 15-20 minutes until the sauce is sticky and glossy.",
+          "Rest 5-10 minutes before serving."
         ]
       }
     },
     "notes": [
+      "Cook by color and tenderness, not internal temperature.",
+      "Resist opening the smoker during the first smoke phase.",
+      "Don't over-sauce — the bark should still be visible.",
+      "A foil pan underneath the grate catches a surprising amount of rendered fat and helps prevent flare-ups.",
+      "Reheats exceptionally well in an air fryer at 375°F for 5-7 minutes.",
       "Rich recipe; small portions go a long way.",
-      "Drain grease before final saucing.",
       "Great party food."
     ],
     "pairsWith": [
