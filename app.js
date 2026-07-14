@@ -12,7 +12,7 @@ let currentUser = null;
    using the exact same UID in firestore.rules. */
 const ADMIN_UIDS = ["ME9lRZmaDYUSwFR0qIhc1TbUqV13"];
 const CONTRIBUTOR_CATEGORY = {
-  // "NATE_UID_HERE": "Nasty Nate's Corner",
+  "bKqnTuR99VW4oV2vHUtckM0Ao4K3": "Nasty Nate's Corner"
   // "STEPHEN_UID_HERE": "Stephen's Snacks"
 };
 

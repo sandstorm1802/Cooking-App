@@ -17,7 +17,7 @@ service cloud.firestore {
       // real UID in. Add Stephen the same way later.
       function contributorCategory() {
         return {
-          // "NATE_UID_HERE": "Nasty Nate's Corner",
+          "bKqnTuR99VW4oV2vHUtckM0Ao4K3": "Nasty Nate's Corner"
           // "STEPHEN_UID_HERE": "Stephen's Snacks"
         }[request.auth.uid];
       }
