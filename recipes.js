@@ -1532,5 +1532,80 @@ const recipes = [
       "Pork Shoulder",
       "Country Style Ribs"
     ]
+  },
+  {
+    "id": 3002,
+    "name": "0→400 Pellet Grill Drumsticks (Dry Rub)",
+    "category": "Main Dishes",
+    "protein": "Chicken",
+    "sauce": "Dry Rub",
+    "carb": "None",
+    "emoji": "🍗",
+    "servings": 4,
+    "prep": "5 min",
+    "mealPrep": false,
+    "freezerFriendly": true,
+    "ingredients": [
+      "3–5 lbs chicken drumsticks",
+      "Favorite BBQ rub"
+    ],
+    "methods": {
+      "Recteq": {
+        "cook": "40–55 min",
+        "instructions": [
+          "Pat drumsticks dry and season generously with your favorite rub.",
+          "Place drumsticks directly on the grill grates while the pellet grill is off (do not preheat).",
+          "Close the lid and set the grill to 400°F.",
+          "Cook for 20–25 minutes, then flip.",
+          "Continue cooking another 20–30 minutes until the internal temperature reaches 180–185°F.",
+          "Remove from the grill and rest 2–3 minutes.",
+          "Serve dry, or toss in your favorite finishing sauce (such as Pickle Crack) after resting."
+        ]
+      }
+    },
+    "notes": [
+      "Don't overcrowd the grill.",
+      "For even crispier skin, increase to 425–450°F for the final 5 minutes.",
+      "Dark meat is best at 180–185°F for tender, juicy results."
+    ],
+    "pairsWith": ["Rice","French Fries"]
+  },
+  {
+    "id": 3003,
+    "name": "0→400 Pellet Grill Drumsticks (BBQ Glazed)",
+    "category": "Main Dishes",
+    "protein": "Chicken",
+    "sauce": "BBQ",
+    "carb": "None",
+    "emoji": "🍗",
+    "servings": 4,
+    "prep": "5 min",
+    "mealPrep": false,
+    "freezerFriendly": true,
+    "ingredients": [
+      "3–5 lbs chicken drumsticks",
+      "Favorite BBQ rub",
+      "BBQ sauce of choice"
+    ],
+    "methods": {
+      "Recteq": {
+        "cook": "40–55 min",
+        "instructions": [
+          "Pat drumsticks dry and season generously with your favorite rub.",
+          "Place drumsticks directly on the grill grates while the pellet grill is off (do not preheat).",
+          "Close the lid and set the grill to 400°F.",
+          "Cook for 20–25 minutes, then flip.",
+          "Continue cooking another 20–30 minutes until the internal temperature reaches 180–185°F.",
+          "During the last 5–7 minutes, brush on a light coat of BBQ sauce.",
+          "Flip, apply a second light coat, and cook another 2–3 minutes to set the glaze."
+        ]
+      }
+    },
+    "notes": [
+      "Don't overcrowd the grill.",
+      "For even crispier skin, increase to 425–450°F for the final 5 minutes.",
+      "Dark meat is best at 180–185°F for tender, juicy results."
+    ],
+    "pairsWith": ["Rice","French Fries"]
   }
 ];
