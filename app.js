@@ -10,7 +10,7 @@ let currentUser = null;
    are locked to one category. Add Nate's and Stephen's UIDs here (from
    Firebase console → Authentication → Users) once they're set up,
    using the exact same UID in firestore.rules. */
-const ADMIN_UIDS = ["ME9lRZmaDYUSwFR0qIhc1TbUqV13"];
+const ADMIN_UIDS = ["ME9lRZmaDYUSwFR0qIhc1TbUqV13", "KZE7w17ZHSdf7CCLiWoZz81wSgt2"];
 const CONTRIBUTOR_CATEGORY = {
   "bKqnTuR99VW4oV2vHUtckM0Ao4K3": "Nasty Nate's Corner"
   // "STEPHEN_UID_HERE": "Stephen's Snacks"

@@ -8,7 +8,8 @@ service cloud.firestore {
       // Admins (currently just Matt) can add/edit/delete any recipe.
       function isAdmin() {
         return request.auth != null && request.auth.uid in [
-          "ME9lRZmaDYUSwFR0qIhc1TbUqV13"
+          "ME9lRZmaDYUSwFR0qIhc1TbUqV13",
+          "KZE7w17ZHSdf7CCLiWoZz81wSgt2"
         ];
       }
 
