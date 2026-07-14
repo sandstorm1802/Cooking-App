@@ -37,6 +37,7 @@
 
     <button class="nav" id="show-shopping">🛒 Shopping List</button>
     <button class="nav" id="show-data">💾 My Data</button>
+    <button class="nav" id="authNavBtn">🔐 Login</button>
 
     <div class="tip">
       <strong>❄️ Meal Prep Tip</strong>
@@ -97,7 +98,7 @@
     <div class="modal-content wide">
       <button id="closeAddRecipeModal" class="close">×</button>
       <h2 id="addRecipeModalTitle">Add a Recipe</h2>
-      <p class="form-hint">This saves to your device right away. To make it permanent and visible everywhere, download the updated <code>recipes.js</code> when you're done and push it to GitHub.</p>
+      <p class="form-hint">This saves straight to the cloud and shows up for everyone right away — no download or GitHub push needed. You'll need to be logged in.</p>
 
       <form id="addRecipeForm">
         <div class="form-grid">
@@ -166,12 +167,34 @@
       </form>
 
       <div id="addRecipeSuccess" class="hidden">
-        <p class="form-success" id="addRecipeSuccessMsg">✅ Saved to this device. To make it permanent, download the updated file and push it to GitHub.</p>
+        <p class="form-success" id="addRecipeSuccessMsg">✅ Saved to the cloud — visible to everyone now.</p>
         <div class="actions">
-          <button class="primary" id="downloadRecipesBtn">⬇ Download updated recipes.js</button>
-          <button id="addAnotherBtn">Add Another Recipe</button>
+          <button class="primary" id="addAnotherBtn">Add Another Recipe</button>
+          <button id="downloadRecipesBtn">⬇ Download a local backup (optional)</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Login -->
+  <div id="authModal" class="modal hidden">
+    <div class="modal-content">
+      <button id="closeAuthModal" class="close">×</button>
+      <h2>Log In</h2>
+      <p class="form-hint">Only Matt and Nate can add or edit recipes. Everyone else can still browse and search freely.</p>
+      <form id="authForm">
+        <label>Email
+          <input type="email" id="auth-email" required autocomplete="username">
+        </label>
+        <label>Password
+          <input type="password" id="auth-password" required autocomplete="current-password">
+        </label>
+        <p id="authError" class="form-error hidden"></p>
+        <div class="actions">
+          <button type="submit" class="primary">Log In</button>
+          <button type="button" id="cancelAuth">Cancel</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -198,7 +221,13 @@
     </div>
   </div>
 
+  <!-- Firebase (compat SDKs — no build step needed for a plain-JS site) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js?v=2"></script>
+
   <script src="recipes.js?v=4"></script>
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=17"></script>
 </body>
 </html>

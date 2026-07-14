@@ -4,6 +4,25 @@ let currentServings = 1;
 let editingId = null;
 let pendingImageDataUrl = null;
 let favoritesOnly = false;
+let currentUser = null;
+
+/* Mirrors firestore.rules. Admins can touch any recipe; contributors
+   are locked to one category. Add Nate's and Stephen's UIDs here (from
+   Firebase console → Authentication → Users) once they're set up,
+   using the exact same UID in firestore.rules. */
+const ADMIN_UIDS = ["ME9lRZmaDYUSwFR0qIhc1TbUqV13"];
+const CONTRIBUTOR_CATEGORY = {
+  // "NATE_UID_HERE": "Nasty Nate's Corner",
+  // "STEPHEN_UID_HERE": "Stephen's Snacks"
+};
+
+function isAdminUser() {
+  return currentUser && ADMIN_UIDS.includes(currentUser.uid);
+}
+
+function lockedCategoryFor(user) {
+  return user ? CONTRIBUTOR_CATEGORY[user.uid] || null : null;
+}
 
 const STORAGE_KEY = "cookingApp.userRecipes";
 const FAVORITES_KEY = "cookingApp.favorites";
@@ -49,23 +68,60 @@ let selectedRecipe = allRecipes[0];
 let favorites = loadFavorites();
 let shoppingItems = loadShoppingList();
 
+/* userRecipes is now backed by Firestore (collection "recipes") so
+   additions/edits sync across every device instantly. localStorage is
+   kept as a local cache only, so the site still shows something useful
+   immediately on load and works if Firestore is briefly unreachable. */
+
 function loadUserRecipes() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch (e) {
-    console.error("Could not read saved recipes:", e);
+    console.error("Could not read cached recipes:", e);
     return [];
   }
 }
 
-function saveUserRecipes() {
+function cacheUserRecipes() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(userRecipes));
   } catch (e) {
-    console.error("Could not save recipe to this browser:", e);
-    alert("Could not save — this browser's storage may be full (large photos take up space).");
+    console.error("Could not cache recipes locally:", e);
   }
+}
+
+function subscribeToRecipes() {
+  if (!window.firebaseReady) {
+    console.warn("Cloud sync unavailable — showing cached/local recipes only.");
+    return;
+  }
+  window.db.collection("recipes").onSnapshot(
+    (snapshot) => {
+      userRecipes = snapshot.docs.map(doc => doc.data());
+      cacheUserRecipes();
+      refreshAllRecipes();
+      initFilters();
+      renderGrid();
+      if (selectedRecipe) {
+        selectedRecipe = allRecipes.find(r => r.id === selectedRecipe.id) || allRecipes[0];
+      }
+      renderDetail();
+    },
+    (err) => {
+      console.error("Recipe sync error, showing last cached copy:", err);
+    }
+  );
+}
+
+async function saveRecipeToCloud(recipeObj) {
+  if (!window.firebaseReady) throw new Error("Cloud sync is unavailable right now.");
+  await window.db.collection("recipes").doc(String(recipeObj.id)).set(recipeObj);
+}
+
+async function deleteRecipeFromCloud(id) {
+  if (!window.firebaseReady) throw new Error("Cloud sync is unavailable right now.");
+  await window.db.collection("recipes").doc(String(id)).delete();
 }
 
 function refreshAllRecipes() {
@@ -483,7 +539,7 @@ function renderGrid() {
     return `
     <article class="card ${selectedRecipe && selectedRecipe.id === r.id ? "selected" : ""}" onclick="selectRecipe(${r.id})">
       <button class="card-favorite ${isFav ? "active" : ""}" onclick="event.stopPropagation(); toggleFavorite(${r.id})" aria-label="Toggle favorite">${isFav ? "♥" : "♡"}</button>
-      ${r.isUserAdded ? `<button class="card-delete" onclick="event.stopPropagation(); deleteUserRecipe(${r.id})" aria-label="Delete recipe">×</button>` : ""}
+      ${r.isUserAdded && currentUser ? `<button class="card-delete" onclick="event.stopPropagation(); deleteUserRecipe(${r.id})" aria-label="Delete recipe">×</button>` : ""}
       <div class="card-img">
         ${ r.image
             ? `<img src="${r.image}" alt="${r.name}">`
@@ -918,19 +974,43 @@ function resetAddRecipeForm() {
 }
 
 function openAddRecipeModal() {
+  if (!currentUser) {
+    closeSidebar();
+    openAuthModal();
+    return;
+  }
   resetAddRecipeForm();
+  const locked = lockedCategoryFor(currentUser);
+  const categoryField = $("f-category");
+  if (locked) {
+    categoryField.value = locked;
+    categoryField.readOnly = true;
+  } else {
+    categoryField.readOnly = false;
+  }
   $("addRecipeModal").classList.remove("hidden");
   closeSidebar();
 }
 
 function openEditRecipeModal(id) {
+  if (!currentUser) {
+    openAuthModal();
+    return;
+  }
   const r = allRecipes.find(x => x.id === id);
   if (!r) return;
+  const locked = lockedCategoryFor(currentUser);
+  if (!isAdminUser() && locked && r.category !== locked) {
+    alert(`You can only edit recipes in "${locked}".`);
+    return;
+  }
   clearFormFields();
   resetFormChrome();
   editingId = id;
   populateFormForRecipe(r);
   setModalMode("edit", r);
+  const categoryField = $("f-category");
+  categoryField.readOnly = !!locked;
   $("addRecipeModal").classList.remove("hidden");
   closeSidebar();
 }
@@ -987,8 +1067,14 @@ function canonicalize(input, knownValues) {
   return match || cleaned;
 }
 
-function handleAddRecipeSubmit(e) {
+async function handleAddRecipeSubmit(e) {
   e.preventDefault();
+
+  if (!currentUser) {
+    closeAddRecipeModal();
+    openAuthModal();
+    return;
+  }
 
   const name = $("f-name").value.trim();
   const category = canonicalize($("f-category").value, categorySuggestions());
@@ -1013,6 +1099,11 @@ function handleAddRecipeSubmit(e) {
   if (!servings || servings < 1) errors.push("Servings must be at least 1.");
   if (!ingredients.length) errors.push("Add at least one ingredient.");
   if (!Object.keys(methods).length) errors.push("Check at least one cooking method and fill in its cook time and instructions.");
+
+  const lockedCategory = lockedCategoryFor(currentUser);
+  if (!isAdminUser() && lockedCategory && category !== lockedCategory) {
+    errors.push(`You can only save recipes under "${lockedCategory}".`);
+  }
 
   if (errors.length) {
     const errEl = $("addRecipeError");
@@ -1042,11 +1133,33 @@ function handleAddRecipeSubmit(e) {
   if (!isBaseRecipeId(id)) recipeObj.isUserAdded = true;
   if (pendingImageDataUrl) recipeObj.image = pendingImageDataUrl;
 
+  const submitBtn = $("addRecipeSubmitBtn");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Saving…";
+
+  try {
+    await saveRecipeToCloud(recipeObj);
+  } catch (err) {
+    console.error("Could not save recipe to the cloud:", err);
+    const errEl = $("addRecipeError");
+    errEl.textContent = "Could not save — check your connection and try again. (" + err.message + ")";
+    errEl.classList.remove("hidden");
+    submitBtn.disabled = false;
+    submitBtn.textContent = editingId !== null ? "Save Changes" : "Save Recipe";
+    return;
+  }
+
+  submitBtn.disabled = false;
+  submitBtn.textContent = editingId !== null ? "Save Changes" : "Save Recipe";
+
+  // The Firestore listener (subscribeToRecipes) will pick this up and
+  // re-render shortly, but we update local state now too so the UI
+  // feels instant instead of waiting on the round trip.
   const existingIdx = userRecipes.findIndex(r => r.id === id);
   if (existingIdx >= 0) userRecipes[existingIdx] = recipeObj;
   else userRecipes.push(recipeObj);
 
-  saveUserRecipes();
+  cacheUserRecipes();
   refreshAllRecipes();
   initFilters();
   renderGrid();
@@ -1055,15 +1168,25 @@ function handleAddRecipeSubmit(e) {
   $("addRecipeForm").classList.add("hidden");
   $("addRecipeSuccess").classList.remove("hidden");
   $("addRecipeSuccessMsg").textContent = editingId !== null
-    ? "✅ Changes saved to this device. To make it permanent, download the updated file and push it to GitHub."
-    : "✅ Saved to this device. To make it permanent, download the updated file and push it to GitHub.";
+    ? "✅ Changes saved to the cloud — visible to everyone now."
+    : "✅ Saved to the cloud — visible to everyone now.";
 }
 
-function resetOverrideToOriginal() {
+async function resetOverrideToOriginal() {
   if (editingId === null) return;
+  if (!currentUser) { openAuthModal(); return; }
   if (!confirm("Discard your edits and revert to the original recipe?")) return;
+
+  try {
+    await deleteRecipeFromCloud(editingId);
+  } catch (err) {
+    console.error("Could not revert recipe in the cloud:", err);
+    alert("Could not revert — check your connection and try again.");
+    return;
+  }
+
   userRecipes = userRecipes.filter(r => r.id !== editingId);
-  saveUserRecipes();
+  cacheUserRecipes();
   refreshAllRecipes();
   initFilters();
   renderGrid();
@@ -1071,13 +1194,27 @@ function resetOverrideToOriginal() {
   closeAddRecipeModal();
 }
 
-function deleteUserRecipe(id) {
+async function deleteUserRecipe(id) {
   const recipe = allRecipes.find(r => r.id === id);
   if (!recipe || !recipe.isUserAdded) return;
-  if (!confirm(`Delete "${recipe.name}"? This only removes it from this device.`)) return;
+  if (!currentUser) { openAuthModal(); return; }
+  const locked = lockedCategoryFor(currentUser);
+  if (!isAdminUser() && locked && recipe.category !== locked) {
+    alert(`You can only delete recipes in "${locked}".`);
+    return;
+  }
+  if (!confirm(`Delete "${recipe.name}"? This removes it for everyone.`)) return;
+
+  try {
+    await deleteRecipeFromCloud(id);
+  } catch (err) {
+    console.error("Could not delete recipe in the cloud:", err);
+    alert("Could not delete — check your connection and try again.");
+    return;
+  }
 
   userRecipes = userRecipes.filter(r => r.id !== id);
-  saveUserRecipes();
+  cacheUserRecipes();
   refreshAllRecipes();
   initFilters();
 
@@ -1263,8 +1400,75 @@ $("favoritesBtn").addEventListener("click", () => {
 });
 
 /* ============================================================
+   Login / auth
+   ============================================================ */
+
+function openAuthModal() {
+  $("authError").classList.add("hidden");
+  $("authForm").reset();
+  $("authModal").classList.remove("hidden");
+}
+
+function closeAuthModal() {
+  $("authModal").classList.add("hidden");
+}
+
+async function handleAuthSubmit(e) {
+  e.preventDefault();
+  const errEl = $("authError");
+  errEl.classList.add("hidden");
+
+  if (!window.firebaseReady) {
+    errEl.textContent = "Login is unavailable right now (couldn't load Firebase). Recipes are still viewable.";
+    errEl.classList.remove("hidden");
+    return;
+  }
+
+  const email = $("auth-email").value.trim();
+  const password = $("auth-password").value;
+
+  try {
+    await window.auth.signInWithEmailAndPassword(email, password);
+    closeAuthModal();
+  } catch (err) {
+    console.error("Login failed:", err);
+    errEl.textContent = "Could not log in — check your email and password and try again.";
+    errEl.classList.remove("hidden");
+  }
+}
+
+function updateAuthNav() {
+  const btn = $("authNavBtn");
+  if (!btn) return;
+  btn.textContent = currentUser ? `🔓 Log Out (${currentUser.email})` : "🔐 Login";
+}
+
+if (window.firebaseReady) {
+  window.auth.onAuthStateChanged((user) => {
+    currentUser = user;
+    updateAuthNav();
+    renderGrid();
+  });
+} else {
+  console.warn("Login unavailable — Firebase did not load.");
+}
+
+/* ============================================================
    Add / Edit Recipe modal wiring
    ============================================================ */
+
+$("authForm").addEventListener("submit", handleAuthSubmit);
+$("closeAuthModal").addEventListener("click", closeAuthModal);
+$("cancelAuth").addEventListener("click", closeAuthModal);
+$("authNavBtn").addEventListener("click", () => {
+  if (currentUser) {
+    if (window.firebaseReady) window.auth.signOut();
+    closeSidebar();
+  } else {
+    closeSidebar();
+    openAuthModal();
+  }
+});
 
 $("addRecipeBtn").addEventListener("click", openAddRecipeModal);
 $("closeAddRecipeModal").addEventListener("click", closeAddRecipeModal);
@@ -1322,3 +1526,4 @@ selectedMethod = preferredMethodFor(selectedRecipe);
 currentServings = selectedRecipe ? selectedRecipe.servings : 1;
 renderGrid();
 renderDetail();
+subscribeToRecipes();
